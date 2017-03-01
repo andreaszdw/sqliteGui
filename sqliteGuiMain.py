@@ -55,7 +55,7 @@ class MainWindow(ttk.Frame):
     #-----------------------------------------------------#
     def initUI(self):
       
-        self.parent.title("sqliteGui")
+        self.parent.title("sqlite-Gui")
         self.makeMenu()
         self.pack(fill=tk.BOTH, expand=1)
         
