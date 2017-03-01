@@ -34,6 +34,7 @@ class MainWindow(ttk.Frame):
             self.uiConfig = pickle.load(open("ini", "rb"))
 
         else:
+            
             # dict for ini informations
             self.uiConfig = {"width": 800,
                         "height": 400,
@@ -103,14 +104,12 @@ class MainWindow(ttk.Frame):
 
                 self.statusBar["text"] = "Datenbank: %s" % os.path.basename(self.DB)
 
-                self.uiConfig["DB"] = self.DB
+                self.uiConfig["db"] = self.DB
 
                 pickle.dump(self.uiConfig, open("ini", "wb"))
 
     #-----------------------------------------------------#
     def exit(self):
-
-        print ("exit")
 
         self.quit()
 
@@ -118,6 +117,6 @@ class MainWindow(ttk.Frame):
 if __name__ == '__main__':
     
     root = tk.Tk()
-    ex = MainWindow(root)
     root.geometry("800x400+300+300")
+    app = MainWindow(root)
     root.mainloop()  
