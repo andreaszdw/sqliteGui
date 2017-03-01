@@ -30,7 +30,7 @@ class MainWindow(tk.Frame):
     #-----------------------------------------------------#
     def initUI(self):
       
-        self.parent.title("File dialog")
+        self.parent.title("File dialogs")
         self.pack(fill=tk.BOTH, expand=1)
         
         self.makeMenu()
