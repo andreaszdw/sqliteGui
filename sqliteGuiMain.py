@@ -118,9 +118,13 @@ class MainWindow(ttk.Frame):
 
         c.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
 
-        print c.fetchall()
+        result = c.fetchall()
 
+        for r in result:
 
+            c.execute("PRAGMA table_info(%s)" % r)
+
+            print c.fetchall()
 
     #-----------------------------------------------------#
     def exit(self):
