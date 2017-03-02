@@ -18,6 +18,7 @@ import tkFileDialog
 
 import os.path
 import pickle
+import sqlite3
 
 #-----------------------------------------------------------------------------#
 class MainWindow(ttk.Frame):
@@ -51,6 +52,9 @@ class MainWindow(ttk.Frame):
 
         # binding for changing size, save info in ini
         self.bind("<Configure>", self.configure)
+
+        #for the connection
+        self.conn = ""
         
     #-----------------------------------------------------#
     def initUI(self):
@@ -99,14 +103,24 @@ class MainWindow(ttk.Frame):
 
             if file != "":
 
-                self.DB = file
+                self.db = file
                 select = True
 
-                self.statusBar["text"] = "Datenbank: %s" % os.path.basename(self.DB)
+                self.statusBar["text"] = "Datenbank: %s" % os.path.basename(self.db)
 
-                self.uiConfig["db"] = self.DB
+                self.uiConfig["db"] = self.db
 
                 pickle.dump(self.uiConfig, open("ini", "wb"))
+
+        self.conn = sqlite3.connect(self.db)
+
+        c = self.conn.cursor()
+
+        c.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
+
+        print c.fetchall()
+
+
 
     #-----------------------------------------------------#
     def exit(self):
