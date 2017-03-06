@@ -15,6 +15,8 @@ main    : andreaszdw@googlemail.com
 import Tkinter as tk
 import ttk
 import tkFileDialog
+from tkintertable.Tables import TableCanvas
+from tkintertable.TableModels import TableModel
 
 import os.path
 import pickle
@@ -62,14 +64,17 @@ class MainWindow(ttk.Frame):
         self.parent.title("sqlite Gui test")
         self.makeMenu()
         self.pack(fill=tk.BOTH, expand=1)
-        
-        
-        self.txt = tk.Text(self)
-        self.txt.pack(fill=tk.BOTH, expand=1)
+
+        # Frame for table
+        frameTable = ttk.Frame(self)
+        frameTable.pack(fill=tk.BOTH, expand=1)
+
+        self.table = TableCanvas(frameTable)
+        self.table.createTableFrame()
 
         # statusbar
         self.statusBar = tk.Label(self, text="Datenbank: %s" % self.uiConfig["db"], bd=1, relief=tk.SUNKEN, anchor=tk.W)
-        self.statusBar.pack(fill=tk.BOTH, expand=1)
+        self.statusBar.pack(fill=tk.BOTH)
 
     #-----------------------------------------------------#
     def makeMenu(self):
@@ -121,6 +126,8 @@ class MainWindow(ttk.Frame):
         result = c.fetchall()
 
         for r in result:
+            print r
+            print ""
 
             c.execute("PRAGMA table_info(%s)" % r)
 
