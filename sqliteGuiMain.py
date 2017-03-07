@@ -15,12 +15,11 @@ main    : andreaszdw@googlemail.com
 import Tkinter as tk
 import ttk
 import tkFileDialog
-from tkintertable.Tables import TableCanvas
-from tkintertable.TableModels import TableModel
+import dbTreeView as dtv
+import tableView as tv
 
 import os.path
 import pickle
-import sqlite3
 
 #-----------------------------------------------------------------------------#
 class MainWindow(ttk.Frame):
@@ -61,7 +60,7 @@ class MainWindow(ttk.Frame):
 
         if self.db != "":
 
-            self.makeTreeView()
+            self.dbTree.makeTreeView(self.db)
 
         
     #-----------------------------------------------------#
@@ -72,33 +71,19 @@ class MainWindow(ttk.Frame):
         self.pack(fill=tk.BOTH, expand=1)
 
         # two paned window
-        pw = ttk.Panedwindow(self, orient=tk.HORIZONTAL)
-        pw.pack(fill=tk.BOTH, expand=1)
+        self.pw = ttk.Panedwindow(self, orient=tk.HORIZONTAL)
+        self.pw.pack(fill=tk.BOTH, expand=1)
 
-        # left side treeview for db
-        self.dbTree = ttk.Treeview(pw)
-        self.dbTree.heading("#0", text="DB in use:")
-        self.dbTree.insert("", 0, text="None")
+        # left side of panel
+        self.dbTree = dtv.dbTreeView(self.pw)
 
-        pw.add(self.dbTree)
+        self.dbTree.bind("<Button-1>", self.treeClick)
 
-        s = ttk.Style()
-        print s.theme_names()
+        self.pw.add(self.dbTree)
+
         # right side, to be set
-        right = tk.Label(pw, text="right")
-        pw.add(right)
-
-        '''
-        # Frame for table
-        frameTable = ttk.Frame(self)
-        frameTable.pack(fill=tk.BOTH, expand=1)
-
-        self.table = TableCanvas(frameTable)
-        self.table.createTableFrame()
-
-        # statusbar
-        self.statusBar = tk.Label(self, text="Datenbank: %s" % self.uiConfig["db"], bd=1, relief=tk.SUNKEN, anchor=tk.W)
-        self.statusBar.pack(fill=tk.BOTH)'''
+        self.table = tv.tableView(self.pw, "", tableName="Leer")
+        self.pw.add(self.table)
 
 
     #-----------------------------------------------------#
@@ -138,60 +123,39 @@ class MainWindow(ttk.Frame):
                 self.db = file
                 select = True
 
-            self.makeTreeView()
+                #save in ini
+                self.uiConfig["db"] = self.db
+                pickle.dump(self.uiConfig, open("ini", "wb"))
 
-
-    #-----------------------------------------------------#
-    def makeTreeView(self):
-
-        # empty the tree
-        for i in self.dbTree.get_children():
-            self.dbTree.delete(i)
-
-        # insert the db name as toplevel in tree
-        self.dbTree.insert("", 0, self.db, text=self.db)
-
-        #self.statusBar["text"] = "Datenbank: %s" % os.path.basename(self.db)
-
-        #save in ini
-        self.uiConfig["db"] = self.db
-        pickle.dump(self.uiConfig, open("ini", "wb"))
-
-        # connect to db
-        self.conn = sqlite3.connect(self.db)
-
-        # get cursor
-        c = self.conn.cursor()
-
-        # get the table names
-        c.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
-        result = c.fetchall()
-
-        tmpCount = 0
-        for r in result:
-
-            tmpCount += 1
-            # insert every table as child in tree
-            tmpChild = self.dbTree.insert(self.db, tmpCount, text=r)
-
-            # get the table_info
-            c.execute("PRAGMA table_info(%s)" % r)
-            childs = c.fetchall()
-
-            tmpCounti = 0
-            for ch in childs:
-                tmpCounti += 1
-                tmpChildi = self.dbTree.insert(tmpChild, tmpCounti, text=ch[1])
-
-        self.dbTree.bind("<Button-1>", self.onClickTree)
-
+            self.dbTree.makeTreeView()
 
     #-----------------------------------------------------#
-    def onClickTree(self, event):
+    def treeClick(self, event):
 
-        item = self.dbTree.identify('item', event.x, event.y)
-        print(self.dbTree.item(item, "text"))
-        print "parent: %s" % self.dbTree.item(self.dbTree.parent(item), "text")
+        item, parentItem = self.dbTree.onClick(event)
+
+        if parentItem == "":
+
+            print "db = %s" % item
+
+        elif parentItem == self.db:
+
+            tmp = self.pw.panes()
+
+            if(len(tmp) > 1):
+
+                self.pw.remove(tmp[1])
+                self.table = None
+                self.table = tv.tableView(self.pw, db=self.db, tableName=item)
+                self.pw.add(self.table)
+
+            print len(tmp)
+
+        else:
+
+            print "column %s of table %s" % (item, parentItem)
+
+
 
 
     #-----------------------------------------------------#
