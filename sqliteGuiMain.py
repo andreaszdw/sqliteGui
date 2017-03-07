@@ -183,9 +183,15 @@ class MainWindow(ttk.Frame):
                 tmpCounti += 1
                 tmpChildi = self.dbTree.insert(tmpChild, tmpCounti, text=ch[1])
 
-        print sqlite3.version
-        print sqlite3.version_info
-        print sqlite3.sqlite_version
+        self.dbTree.bind("<Button-1>", self.onClickTree)
+
+
+    #-----------------------------------------------------#
+    def onClickTree(self, event):
+
+        item = self.dbTree.identify('item', event.x, event.y)
+        print(self.dbTree.item(item, "text"))
+        print "parent: %s" % self.dbTree.item(self.dbTree.parent(item), "text")
 
 
     #-----------------------------------------------------#
